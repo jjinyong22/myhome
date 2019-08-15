@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="springmapper">
+
+	<update id="updateOrderNoReply" parameterType="model.Writing">
+		update image_writing set order_no = order_no + 1
+		where group_id = #{group_id} and order_no >= #{order_no}
+	</update>
+
+	<select id="selectMaxGroupId" resultType="Integer">
+		select max(group_Id) max_id from image_writing
+	</select>
+
+	<select id="selectReplyPages" parameterType="Integer" resultType="Integer">
+      select rn from(
+         select a.*, rownum rn from (
+            (
+               select * from image_writing
+               order by group_id desc, order_no asc
+            )a
+         )
+      ) where writing_id = #{writing_id}
+   </select>
+
+	<select id="selectImageCount" resultType="Integer">
+		select count(*) from image_writing
+	</select>
+
+	<update id="updateWritingInfo" parameterType="model.Writing">
+		update image_writing set writer_name=#{writer_name},
+		email=#{email}, title=#{title}, content=#{content},
+		image_name=#{image_name} where writing_id=#{writing_id}
+	</update>
+
+	<delete id="deleteWritingInfo" parameterType="Integer">
+		delete from image_writing where writing_id=#{writing_id}
+	</delete>
+
+	<select id="getWritingInfo" parameterType="model.Condition"
+		resultType="model.Writing">
+		select * from (
+			select a.*, rownum rn from (
+				(
+					select * from image_writing
+					order by group_id desc, order_no asc
+				)a
+			)
+		) where rn between #{startRow} and #{endRow}
+	</select>
+
+	<select id="getWritingInfoById" resultType="model.Writing"
+		parameterType="Integer">
+			select * from image_writing where writing_id=#{writing_id}
+		</select>
+
+	<insert id="insertWriting" parameterType="model.Writing">
+		insert into image_writing values(#{writing_id},
+		#{group_id},#{order_no},#{parent_id},
+		#{register_date},
+		#{writer_name},#{email},#{image_name},#{password},#{title},#{content})
+	</insert>
+
+	<select id="getMaxWritingId" resultType="Integer">
+		select max(writing_id) max_id from image_writing
+	</select>
+	
+	<select id="selectCart" resultType="model.CartItem"
+		parameterType="String">
+		select cart.code code,cart.num num, i.price price,
+		i.name name from cart cart, item_info i
+		where cart.code = i.code and cart.id = #{id}
+	</select>
+	<update id="updateCart" parameterType="model.CartItem">
+		update cart set num=#{num} where code=#{code} and id=#{id}
+	</update>
+	<delete id="deleteCart" parameterType="model.CartItem">
+		delete from cart where code=#{code} and id=#{id}
+	</delete>
+	<insert id="insertCart" parameterType="model.CartItem">
+		insert into cart values(#{seqno},#{code},#{id},#{num})
+	</insert>
+	<select id="selectMaxCart" resultType="Integer">
+	select max(seqno) max_seqno from cart
+	</select>
+
+	<select id="getItemCount" resultType="Integer">
+	select count(*) as cnt from item_info
+	</select>
+	<insert id="putItem" parameterType="model.Item">
+	insert into item_info(code,name,price,info,origin)
+	values(#{code},#{name},#{price},#{info},#{origin})
+	</insert>
+	<select id="getItemList" resultType="model.Item"
+			parameterType="model.Condition">
+	select * from item_info
+	</select>
+	<select id="getNOTICEList" resultType="model.Notice"
+		parameterType="model.Condition">
+		select code,title,content,notice_date from(
+		select a.*, rownum rn from(
+		(select * from notice order by code desc) a
+		)
+		)where rn between #{startRow} and #{endRow}
+		</select>
+	<select id="getNOTICEDetail" resultType="model.Notice">
+		select * from notice where code=#{code}
+	</select>
+	<select id="getNOTICECount" resultType="Integer">
+		select count(*) as num from notice
+	</select>
+	<select id="getBBSList" resultType="model.Bbs"
+			parameterType="model.Condition">
+	select seqno,title,id,content,bbs_date from 
+	(
+		select a.*, rownum rn from 
+		(
+			(select * from bbs order by seqno desc) a
+		)
+	)where rn between #{startRow} and #{endRow}
+	</select>
+	<select id="getBBSDetail" resultType="model.Bbs">
+	select * from bbs where seqno = #{seqno}
+	</select>
+	<select id="getBBSCount" resultType="Integer">
+	select count(*) as num from bbs
+	</select>
+
+	<select id="checkId" parameterType="String"
+		resultType="Integer">
+	select count(*) as cnt from user_account where user_id=#{id}
+	</select>
+	<select id="getPassword" resultType="String"
+		parameterType="String">
+	select password from user_account where user_id = #{id}	
+	</select>
+	<select id="getUser" resultType="model.User"
+		parameterType="String">
+	select user_id as id, user_name as name, password,
+		postcode, address, email, job
+	from user_account where user_id = #{id}
+	</select>
+	<select id="getMaxBbsId" resultType="Integer">
+	select max(seqno) as max_id from bbs
+	</select>
+	<insert id="putBBS" parameterType="model.Bbs">
+	insert into bbs values(#{seqno},#{title},#{content},#{id},
+				#{bbs_date})
+	</insert>
+	<insert id="putUser" parameterType="model.User">
+	insert into user_account(user_id,user_name,password,
+	email,job,gender) values(#{id},#{name},
+	#{password},#{email},#{job},#{gender})
+	</insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
